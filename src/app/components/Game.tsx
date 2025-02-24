@@ -18,6 +18,7 @@ interface GameProps {
   onRemovePlayer?: () => void; // Optional since final game won't have these
   onToggleStart?: () => void;
   isPreliminary?: boolean; // To determine whether to show the buttons
+  onWinnersDeclared?: (player: Player, index: number) => void;
 }
 
 export function Game({
@@ -29,6 +30,7 @@ export function Game({
   onRemovePlayer,
   onToggleStart,
   isPreliminary = false,
+  onWinnersDeclared,
 }: GameProps) {
   return (
     <div className={`border p-4 rounded-lg mb-4 ${started ? 'bg-green-50' : ''}`}>
@@ -55,12 +57,15 @@ export function Game({
               <input
                 type="checkbox"
                 checked={player.isWinner}
-                onChange={(e) =>
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    onWinnersDeclared?.(player, gameNumber - 1);
+                  }
                   onPlayerChange(gameNumber - 1, index, {
                     ...player,
                     isWinner: e.target.checked,
-                  })
-                }
+                  });
+                }}
                 disabled={!started}
               />
               Winner
@@ -69,16 +74,6 @@ export function Game({
         ))}
         {isPreliminary && !started && (
           <div className="flex gap-2">
-            <button
-              onClick={onToggleStart}
-              className={`px-3 py-1 rounded text-sm ${
-                started
-                  ? 'bg-yellow-500 hover:bg-yellow-600'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              } text-white`}
-            >
-              {started ? 'Reset Game' : 'Start Game'}
-            </button>
             <button
               onClick={onAddPlayer}
               disabled={players.length >= 5}
@@ -92,6 +87,16 @@ export function Game({
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:bg-gray-300 text-sm"
             >
               Remove Player
+            </button>
+            <button
+              onClick={onToggleStart}
+              className={`px-3 py-1 rounded text-sm ${
+                started
+                  ? 'bg-yellow-500 hover:bg-yellow-600'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              } text-white`}
+            >
+              {started ? 'Reset Game' : 'Start Game'}
             </button>
           </div>
         )}
